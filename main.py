@@ -10,7 +10,9 @@ def main():
   board = Board(BOARD_ROWS, BOARD_COLS)
 
   player1 = HumanPlayer(1)
+  # player2 = HumanPlayer(2)
   player2 = CPUPlayer(2, 5)
+
 
   current_player = player1
 

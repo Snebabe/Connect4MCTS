@@ -9,6 +9,7 @@ class CPUPlayer(Player):
     self.time_limit = time_limit
 
   def make_move(self, board: Board):
+    print("Thinking...")
     root = Node(state=board.clone())
     mcts = MCTS(self.time_limit, 2**0.5)
     best_node = mcts.search(root)

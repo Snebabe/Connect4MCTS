@@ -5,6 +5,7 @@ class Node:
   def __init__(self, state: Board, parent=None):
     self.state = state
     self.parent = parent
+    self.untried_moves = state.get_untried_moves()
     self.children = []
     self.visits = 0
     self.value = 0.0
@@ -17,8 +18,11 @@ class Node:
     # Return child with best UCT score
     def uct_score(child: Node):
       # UCT (Upper Confidence Bound)
-      # TODO: Add more info
-      exploitation = child.value / (child.visits)
+      # We want to check on moves we believe our good
+      # We also want to explore moves we haven't tried yet
+      # A high UCT is given to a node that has a high exploitation and low exploration
+      # The formula is wrong as of now (250123)
+      exploitation = child.value / child.visits
       exploration = uct_constant * (self.visits/child.visits)**0.5
       return exploitation + exploration
     
