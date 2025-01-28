@@ -1,21 +1,27 @@
 import random
 import time
 from .node import Node
-from .utils import print_tree, dprint
+
+# only prints if DEBUG = True in config.py
+from .utils import dprint_tree, dprint
 
 class MCTS:
-  def __init__(self, time_limit, uct_constant):
+  def __init__(self, uct_constant, time_limit=0, limit=0):
       self.time_limit = time_limit
       self.uct_constant = uct_constant
+      self.limit = limit
+      self.rollouts = 0
 
   # Ground function to search for a move, includes all steps
   # Select the node with the best UCT score
   # Expand the node 
   def search(self, root_node: Node):
-    dprint("Starting search, this is our node:")
-    print_tree(root_node)
+    
+    # dprint("Starting search, this is our node:")
+    # dprint_tree(root_node)
+
     end_time = time.time() + self.time_limit
-    while time.time() < end_time:
+    while time.time() < end_time or self.rollouts < self.limit:
       node = self._select(root_node)
       reward = self._simulate(node)
       self._backpropagate(node, reward)
@@ -23,42 +29,38 @@ class MCTS:
     return root_node.best_child(uct_constant=0)
   
   def _select(self, node: Node):
+    
     dprint("Selecting node from:")
-    print_tree(node)
+    dprint_tree(node)
+
     while not node.state.is_game_over():
       if not node.is_fully_expanded():
         return self._expand(node)
         
       node = node.best_child(self.uct_constant)
-    dprint("Returning this node:")
-    print_tree(node)
     return node
   
   def _expand(self, node: Node):
-    # Get untried moves
-    # Choose a move and remove it from the untried moves
-    # Create a new state that plays the move
-    # The new state gets added as a child node
-    
-    # From the child node a simulation will be run
-    # Not here
+    # Adds a child node playing an untried move
+    # from the currrent node's state
+
     dprint("Expanding on:")
-    print_tree(node)
+    dprint_tree(node)
+    
     untried_moves = node.untried_moves
 
-    new_move = random.choice(untried_moves)
-    node.untried_moves.remove(new_move)
+    for move in untried_moves:
+      new_state = node.state.clone()
+      new_state.drop_piece(move, node.state.current_player)
+      node.add_child(new_state)
 
-    new_state = node.state.clone()
-    new_state.drop_piece(new_move, node.state.current_player)
+    node.untried_moves = []
 
-    dprint("Expanded with this child:")
-    dprint(new_state)
-    return node.add_child(new_state)
+    return random.choice(node.children)
   
   def _simulate(self, node: Node):
     dprint("Simulating node, this is our node:")
-    print_tree(node)
+    dprint_tree(node)
     current_state = node.state.clone()
     while not current_state.is_game_over():
       dprint("Playing a random move")
@@ -68,6 +70,7 @@ class MCTS:
       dprint(current_state)
     
     dprint("Simulation over")
+    self.rollouts += 1
     if current_state.check_win(1):
       return -1
     if current_state.check_win(2):

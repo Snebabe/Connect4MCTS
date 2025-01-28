@@ -11,7 +11,7 @@ def main():
 
   player1 = HumanPlayer(1)
   # player2 = HumanPlayer(2)
-  player2 = CPUPlayer(2, 5)
+  player2 = CPUPlayer(2, 10, 10000)
 
 
   current_player = player1

@@ -1,3 +1,4 @@
+from copy import deepcopy
 
 class Board:
   def __init__(self, rows, cols):
@@ -6,6 +7,7 @@ class Board:
     self.grid = [[0 for _ in range(cols)] for _ in range(rows)]
     self.current_player = 1
     self.last_move = None
+    self.game_over_cache = None
 
   def drop_piece(self, col, player):
     for row in reversed(range(self.rows)):
@@ -13,6 +15,7 @@ class Board:
         self.grid[row][col] = player
         self.last_move = col
         self.current_player = 3 - int(player)
+        self.game_over_cache = None
         return
     
     raise ValueError("Column is full")
@@ -58,11 +61,14 @@ class Board:
     return False
   
   def is_game_over(self):
-    return self.is_draw() or any(self.check_win(player) for player in (1, 2))
+    if self.game_over_cache is None:
+      self.game_over_cache = self.is_draw() or any(self.check_win(player) for player in (1, 2))
+    
+    return self.game_over_cache
   
   def clone(self):
     new_board = Board(self.rows, self.cols)
-    new_board.grid = [row[:] for row in self.grid]
+    new_board.grid = deepcopy(self.grid)
     new_board.last_move = self.last_move
     new_board.current_player = self.current_player
     return new_board

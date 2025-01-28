@@ -1,5 +1,6 @@
 # Node for MCTS
 from game_logic.board import Board
+from math import sqrt, log, inf
 
 class Node:
   def __init__(self, state: Board, parent=None):
@@ -21,9 +22,14 @@ class Node:
       # We want to check on moves we believe our good
       # We also want to explore moves we haven't tried yet
       # A high UCT is given to a node that has a high exploitation and low exploration
-      # The formula is wrong as of now (250123)
+      # The formula is from wikipedia 
+      
+      if child.visits == 0:
+        return inf
+
       exploitation = child.value / child.visits
-      exploration = uct_constant * (self.visits/child.visits)**0.5
+
+      exploration = uct_constant * sqrt(log(self.visits)/child.visits)
       return exploitation + exploration
     
     return max(self.children, key=uct_score)
