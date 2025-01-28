@@ -25,7 +25,7 @@ class Node:
       # The formula is from wikipedia 
       
       if child.visits == 0:
-        return inf
+        return 0 if uct_constant == 0 else inf
 
       exploitation = child.value / child.visits
 
